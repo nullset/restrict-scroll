@@ -1,7 +1,6 @@
-const allowScrollingInside = {
-  elements: [],
-  selectors: [],
-};
+import normalizeWheel from 'normalize-wheel';
+
+let allowScrollingInside;
 
 const events = ['scroll', 'wheel'];
 const eventOptions = {
@@ -9,49 +8,73 @@ const eventOptions = {
   passive: false,
 };
 
-function groupItems(exceptions) {
-  exceptions = Array.isArray(exceptions) ? exceptions : [exceptions];
-  exceptions.forEach((exception) => {
-    switch (typeof exception) {
-      case 'string':
-        allowScrollingInside['selectors'].push(exception.trim());
-        break;
-      default:
-        if (exception.nodeType === 1)
-          allowScrollingInside['elements'].push(exception);
-        break;
-    }
-  });
-}
+// function groupItems(exceptions) {
+//   exceptions = Array.isArray(exceptions) ? exceptions : [exceptions];
+//   exceptions.forEach((exception) => {
+//     switch (typeof exception) {
+//       case 'string':
+//         allowScrollingInside['selectors'].push(exception.trim());
+//         break;
+//       default:
+//         if (exception.nodeType === 1)
+//           allowScrollingInside['elements'].push(exception);
+//         break;
+//     }
+//   });
+// }
 
-function removeItemFromGroup(exceptions) {
-  exceptions = Array.isArray(exceptions) ? exceptions : [exceptions];
-  exceptions.forEach((exception) => {
-    let key;
-    let idx;
-    switch (typeof exception) {
-      case 'string':
-        key = 'selectors';
-        idx = allowScrollingInside[key].indexOf(exception.trim());
-        break;
-      default:
-        if (item.nodeType === 1) {
-          key = 'elements';
-          idx = allowScrollingInside[key].indexOf(exception.trim());
-        }
-        break;
-    }
-    if (key && idx > -1) {
-      allowScrollingInside[key].splice(idx, 1);
-    }
-  });
-}
+// function removeItemFromGroup(exceptions) {
+//   exceptions = Array.isArray(exceptions) ? exceptions : [exceptions];
+//   exceptions.forEach((exception) => {
+//     let key;
+//     let idx;
+//     switch (typeof exception) {
+//       case 'string':
+//         key = 'selectors';
+//         idx = allowScrollingInside[key].indexOf(exception.trim());
+//         break;
+//       default:
+//         if (item.nodeType === 1) {
+//           key = 'elements';
+//           idx = allowScrollingInside[key].indexOf(exception.trim());
+//         }
+//         break;
+//     }
+//     if (key && idx > -1) {
+//       allowScrollingInside[key].splice(idx, 1);
+//     }
+//   });
+// }
 
-function handler(e) {
-  console.log({ detail: e.detail });
-  const selectorString = allowScrollingInside.selectors.join(',');
+function handler2(e) {
+  const elems = e.composedPath();
+  const idx = elems.indexOf(allowScrollingInside);
+  if (idx > -1) {
+    const parentElems = elems.slice(idx + 1);
+    parentElems.forEach((elem) => {
+      elem.addEventListener(
+        'wheel',
+        (e) => {
+          if (parentElems.includes(e.currentTarget)) e.preventDefault();
+        },
+        {
+          passive: false,
+        },
+      );
+      // Object.defineProperty(elem, 'scrollTop', {
+      //   set: function (value) {},
+      //   configurable: true,
+      // });
+    });
+  }
 
-  const idx = e.composedPath().indexOf();
+  return;
+  // const normalized = normalizeWheel(e);
+  // console.log(normalized);
+  // return;
+  // const selectorString = allowScrollingInside.selectors.join(',');
+
+  // const idx = e.composedPath().indexOf();
 
   // TODO: What about scrolling in 2 dimensions?
   // node.scrollTop = node.scrollHeight - node.clientHeight - e.deltaY;
@@ -97,12 +120,53 @@ function handler(e) {
   }
 }
 
+function wheelHandler(e) {
+  e.preventDefault();
+  const nodePath = e.composedPath();
+  const idx = nodePath.indexOf(allowScrollingInside);
+  if (idx > -1) {
+    const elems = nodePath.slice(0, idx + 1);
+    if (elems.length) {
+      let { pixelX, pixelY } = normalizeWheel(e);
+      elems.forEach((elem) => {
+        const initScrollTop = elem.scrollTop;
+        const initScrollLeft = elem.scrollLeft;
+        elem.scrollBy(pixelX, pixelY);
+        const diffTop = elem.scrollTop - initScrollTop;
+        const diffLeft = elem.scrollLeft - initScrollLeft;
+        pixelY = pixelY - diffTop;
+        pixelX = pixelX - diffLeft;
+      });
+    }
+  }
+}
+
+const EventListener = {
+  handleEvent(e) {
+    this[`on${e.type}`](e);
+  },
+};
+
+const EL = Object.create(EventListener, {});
+
+function scrollHandler(e) {
+  debugger;
+  if (!e.composedPath().includes(allowScrollingInside)) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}
+
 function on() {
   // events.forEach((event) => {
   //   window.addEventListener(event, handler, eventOptions);
   // });
-  window.addEventListener('wheel', handler, eventOptions);
-  window.addEventListener('scroll', (e) => e.preventDefault(), eventOptions);
+
+  window.addEventListener('wheel', wheelHandler, eventOptions);
+  window.addEventListener('scroll', EventListener, eventOptions);
+
+  // window.addEventListener('wheel', (e) => e.preventDefault(), eventOptions);
+  // window.addEventListener('scroll', handler, eventOptions);
 }
 
 function off() {
@@ -117,19 +181,17 @@ function clear() {
   });
 }
 
-export default function restrictScroll(exceptions) {
-  if (exceptions) {
-    groupItems(exceptions);
-    on();
-  }
+export default function restrictScroll(exception) {
+  allowScrollingInside = exception;
+  on();
 
   return {
-    prevent: function prevent(exceptions) {
-      removeItemFromGroup(exceptions);
-    },
-    allow: function allow(exceptions) {
-      groupItems(exceptions);
-    },
+    // prevent: function prevent(exceptions) {
+    //   removeItemFromGroup(exceptions);
+    // },
+    // allow: function allow(exceptions) {
+    //   groupItems(exceptions);
+    // },
     clear,
     on,
     off,
