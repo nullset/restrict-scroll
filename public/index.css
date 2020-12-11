@@ -1,14 +1,49 @@
-#img {
-  display: block;
-  margin: auto;
-  height: 128px;
-  width: 128px;
-  padding: 2rem;
+*,
+*::before,
+*:after {
+  box-sizing: border-box;
 }
 
-#canvas {
-  display: block;
-  margin: 2rem auto;
-  width: 540px;
-  height: 540px;
+h1,
+h2,
+h3 {
+  font-family: Lato;
+}
+
+#page {
+  padding-top: 20px;
+}
+
+.modal {
+  border: 3px solid red;
+}
+#modal {
+  position: fixed;
+  top: 25%;
+  left: 10%;
+  width: 80%;
+  background: #fff;
+  padding: 10px;
+  height: 50vh;
+  overflow: auto;
+  box-shadow: 0 10px 20px;
+}
+
+.section {
+  border: 3px solid royalblue;
+}
+#section {
+  padding: 10px;
+  height: 20vh;
+  overflow: auto;
+}
+
+#controls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  background: #ccc;
+  padding: 3px 10px;
+  text-align: center;
 }
