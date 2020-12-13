@@ -129,13 +129,13 @@ function wheelHandler(e) {
     if (elems.length) {
       let { pixelX, pixelY } = normalizeWheel(e);
       elems.forEach((elem) => {
-        const initScrollTop = elem.scrollTop;
-        const initScrollLeft = elem.scrollLeft;
+        // const initScrollTop = elem.scrollTop;
+        // const initScrollLeft = elem.scrollLeft;
         elem.scrollBy(pixelX, pixelY);
-        const diffTop = elem.scrollTop - initScrollTop;
-        const diffLeft = elem.scrollLeft - initScrollLeft;
-        pixelY = pixelY - diffTop;
-        pixelX = pixelX - diffLeft;
+        // const diffTop = elem.scrollTop - initScrollTop;
+        // const diffLeft = elem.scrollLeft - initScrollLeft;
+        // pixelY = pixelY - diffTop;
+        // pixelX = pixelX - diffLeft;
       });
     }
   }
@@ -147,7 +147,65 @@ const EventListener = {
   },
 };
 
-const EL = Object.create(EventListener, {});
+const EL = Object.create(EventListener, {
+  elements: {
+    writeable: true,
+    value: new WeakMap(),
+  },
+  onscroll: {
+    value(e) {
+      if (!e.composedPath().includes(allowScrollingInside)) {
+        e.preventDefault();
+        const target =
+          e.target === document ? document.documentElement : e.target;
+        const initScroll = this.elements.get(target);
+        if (initScroll) {
+          // Technically shouldn't have to make a microtask here, but Chrome can have a rendering glitch without it.
+          queueMicrotask(() => {
+            target.scrollTo(initScroll.left, initScroll.top);
+          });
+        }
+      }
+      // e.preventDefault();
+      // const scrolledElem = this.elements.get(e.target);
+      // if (scrolledElem) {
+      //   e.target.scrollTo(scrolledElem.top, scrolledElem.left);
+      // }
+    },
+  },
+  onkeydown: {
+    value(e) {
+      this.elements.set(e.target, {
+        top: e.target.scrollTop,
+        left: e.target.scrollLeft,
+      });
+    },
+  },
+  onmousedown: {
+    value(e) {
+      this.elements.set(e.target, {
+        top: e.target.scrollTop,
+        left: e.target.scrollLeft,
+      });
+    },
+  },
+  onwheel: {
+    value(e) {
+      e.preventDefault();
+      const nodePath = e.composedPath();
+      const idx = nodePath.indexOf(allowScrollingInside);
+      if (idx > -1) {
+        const elems = nodePath.slice(0, idx + 1);
+        if (elems.length) {
+          let { pixelX, pixelY } = normalizeWheel(e);
+          elems.forEach((elem) => {
+            elem.scrollBy(pixelX, pixelY);
+          });
+        }
+      }
+    },
+  },
+});
 
 function scrollHandler(e) {
   debugger;
@@ -162,8 +220,10 @@ function on() {
   //   window.addEventListener(event, handler, eventOptions);
   // });
 
-  window.addEventListener('wheel', wheelHandler, eventOptions);
-  window.addEventListener('scroll', EventListener, eventOptions);
+  window.addEventListener('wheel', EL, eventOptions);
+  window.addEventListener('mousedown', EL, { capture: true });
+  window.addEventListener('keydown', EL, { capture: true });
+  window.addEventListener('scroll', EL, { capture: true });
 
   // window.addEventListener('wheel', (e) => e.preventDefault(), eventOptions);
   // window.addEventListener('scroll', handler, eventOptions);
