@@ -1,24 +1,42 @@
-# New Project
+# restrict-scroll
 
-> ✨ Bootstrapped with Create Snowpack App (CSA).
+A tiny library to restrict scrolling to a single element and its children.
 
-## Available Scripts
+## Why use this library instead of libary X, Y, or Z?
 
-### npm start
+Most solutions to this problem rely on tweaking the CSS of various elements on the fly to effectively make them unscrollable by making their `overflow` CSS property be `none`. While this is an easy and effective solution it can cause jarring page reflows as scrollbars can appear/disappear on the page.
 
-Runs the app in the development mode.
-Open http://localhost:8080 to view it in the browser.
+`restrict-scroll` instead listens to various events, intercepting them, and preventing elements from being scrolled.
 
-The page will reload if you make edits.
-You will also see any lint errors in the console.
+## How to use
 
-### npm run build
+`npm install restrict-scroll`
 
-Builds a static copy of your site to the `build/` folder.
-Your app is ready to be deployed!
+or
 
-**For the best production performance:** Add a build bundler plugin like [@snowpack/plugin-webpack](https://github.com/snowpackjs/snowpack/tree/main/plugins/plugin-webpack) or [snowpack-plugin-rollup-bundle](https://github.com/ParamagicDev/snowpack-plugin-rollup-bundle) to your `snowpack.config.json` config file.
+`yarn add restrict-scroll`
 
-### Q: What about Eject?
+and then in your javascript
 
-No eject needed! Snowpack guarantees zero lock-in, and CSA strives for the same.
+```
+import restrictScroll from 'restrict-scroll';
+
+const scrollableElement = document.getElementById('my-scroller');
+const scroller = restrictScroll(scrollableElement);
+```
+
+## API
+
+Restricting scrolling on a page is as simple as calling `restrictScroll()` or `restrictScroll(element)`.
+
+### set(<element>)
+
+Updates the element that can be scrolled. If no element is passed to the `set` or `restrictScroll` functions, by default ALL scrolling on the page in every element is disabled. If an element is passed to the function, then scrolling is limited to occurring within that element and all of that element's child elements.
+
+### off()
+
+Enables scrolling on all elements on the page.
+
+### on()
+
+Disables scrolling on every element on the page _except_ for the element specified within the `set` function or passed to the `restrictScrolling` function.
