@@ -1,21 +1,14 @@
 import normalizeWheel from 'normalize-wheel';
 
-let allowScrollingInside;
+// Specified element where scrolling is allowed.
+// NOTE: This enables scrolling within this element, including on other children within this element.
+let allowScrollingWithin;
 
 const events = ['wheel', 'mousedown', 'keydown', 'scroll'];
 const eventOptions = {
   capture: true,
   passive: false,
 };
-
-// // Fixes a long-lived Chrome bug wherein a section can go hidden after an event.
-// // https://stackoverflow.com/questions/8840580/force-dom-redraw-refresh-on-chrome-mac
-// function repaint() {
-//   allowScrollingInside.hidden = true;
-//   queueMicrotask(() => {
-//     allowScrollingInside.hidden = false;
-//   });
-// }
 
 const EventListener = {
   handleEvent(e) {
@@ -24,20 +17,20 @@ const EventListener = {
 };
 
 const handler = Object.create(EventListener, {
-  elements: {
+  elementScrollPositions: {
     writeable: true,
     value: new WeakMap(),
   },
   onkeydown: {
     value(e) {
-      if (!e.composedPath().includes(allowScrollingInside)) {
+      if (!e.composedPath().includes(allowScrollingWithin)) {
         e.preventDefault();
       }
     },
   },
   onmousedown: {
     value(e) {
-      this.elements.set(e.target, {
+      this.elementScrollPositions.set(e.target, {
         top: e.target.scrollTop,
         left: e.target.scrollLeft,
       });
@@ -45,11 +38,11 @@ const handler = Object.create(EventListener, {
   },
   onscroll: {
     value(e) {
-      if (!e.composedPath().includes(allowScrollingInside)) {
+      if (!e.composedPath().includes(allowScrollingWithin)) {
         e.preventDefault();
         const target =
           e.target === document ? document.documentElement : e.target;
-        const initScroll = this.elements.get(target);
+        const initScroll = this.elementScrollPositions.get(target);
         if (initScroll) {
           target.scrollTo(initScroll.left, initScroll.top);
         }
@@ -60,13 +53,21 @@ const handler = Object.create(EventListener, {
     value(e) {
       e.preventDefault();
       const nodePath = e.composedPath();
-      const idx = nodePath.indexOf(allowScrollingInside);
+      const idx = nodePath.indexOf(allowScrollingWithin);
       if (idx > -1) {
         const elems = nodePath.slice(0, idx + 1);
         if (elems.length) {
           let { pixelX, pixelY } = normalizeWheel(e);
           elems.forEach((elem) => {
+            // Scroll any scrollable element that is either `allowScrollingElement` or within `allowScrollingElemnt`.
+            // Ensure that the remaining wheel delta is updated by the scrollable amount as each element is scrolled.
+            const top = elem.scrollTop;
+            const left = elem.scrollLeft;
             elem.scrollBy(pixelX, pixelY);
+            const diffTop = elem.scrollTop - top;
+            const diffLeft = elem.scrollLeft - left;
+            pixelY = pixelY - diffTop;
+            pixelX = pixelX - diffLeft;
           });
         }
       }
@@ -74,37 +75,33 @@ const handler = Object.create(EventListener, {
   },
 });
 
+// Restrict scrolling to only elements within the `exception` element.
 function on() {
   events.forEach((event) => {
     window.addEventListener(event, handler, eventOptions);
   });
 }
 
+// Allow scrolling on all elements once again.
 function off() {
   events.forEach((event) => {
     window.removeEventListener(event, handler, eventOptions);
   });
 }
 
-function clear() {
-  Object.keys(allowScrollingInside).forEach((key) => {
-    allowScrollingInside[key] = [];
-  });
+// Update the element that scrolling is allowed within.
+function set(elem) {
+  allowScrollingWithin = elem;
 }
 
 export default function restrictScroll(exception) {
-  allowScrollingInside = exception;
+  // If `exception` is blank, no element can be scrolled.
+  set(exception);
   on();
 
   return {
-    // prevent: function prevent(exceptions) {
-    //   removeItemFromGroup(exceptions);
-    // },
-    // allow: function allow(exceptions) {
-    //   groupItems(exceptions);
-    // },
-    clear,
     on,
     off,
+    set,
   };
 }
