@@ -1,8 +1,19 @@
 import normalizeWheel from 'normalize-wheel';
 
-// Specified element where scrolling is allowed.
-// NOTE: This enables scrolling within this element, including on other children within this element.
-let allowScrollingWithin;
+let allowScrollingWithin = new Set();
+
+function scrollableElement() {
+  const arr = Array.from(allowScrollingWithin);
+  for (let i = arr.length - 1; i >= 0; i--) {
+    const node = arr[i];
+    if (node && node.isConnected) {
+      return node;
+    } else {
+      arr.splice(i, 1);
+      allowScrollingWithin.delete(node);
+    }
+  }
+}
 
 const events = ['wheel', 'mousedown', 'keydown', 'scroll'];
 const eventOptions = {
@@ -23,7 +34,7 @@ const handler = Object.create(EventListener, {
   },
   onkeydown: {
     value(e) {
-      if (!e.composedPath().includes(allowScrollingWithin)) {
+      if (!e.composedPath().includes(scrollableElement())) {
         e.preventDefault();
       }
     },
@@ -38,7 +49,7 @@ const handler = Object.create(EventListener, {
   },
   onscroll: {
     value(e) {
-      if (!e.composedPath().includes(allowScrollingWithin)) {
+      if (!e.composedPath().includes(scrollableElement())) {
         e.preventDefault();
         const target =
           e.target === document ? document.documentElement : e.target;
@@ -53,7 +64,7 @@ const handler = Object.create(EventListener, {
     value(e) {
       e.preventDefault();
       const nodePath = e.composedPath();
-      const idx = nodePath.indexOf(allowScrollingWithin);
+      const idx = nodePath.indexOf(scrollableElement());
       if (idx > -1) {
         const elems = nodePath.slice(0, idx + 1);
         if (elems.length) {
@@ -75,33 +86,34 @@ const handler = Object.create(EventListener, {
   },
 });
 
-// Restrict scrolling to only elements within the `exception` element.
-function on() {
-  events.forEach((event) => {
-    window.addEventListener(event, handler, eventOptions);
-  });
-}
+export default {
+  // Specified element where scrolling is allowed.
+  // NOTE: This enables scrolling within this element, including on other children within this element.
+  elements: new Set(),
 
-// Allow scrolling on all elements once again.
-function off() {
-  events.forEach((event) => {
-    window.removeEventListener(event, handler, eventOptions);
-  });
-}
+  // Restrict scrolling to only elements within the `exception` element.
+  run: function () {
+    events.forEach((event) => {
+      window.addEventListener(event, handler, eventOptions);
+    });
+  },
 
-// Update the element that scrolling is allowed within.
-function set(elem) {
-  allowScrollingWithin = elem;
-}
+  // Allow scrolling on all elements once again.
+  stop: function () {
+    events.forEach((event) => {
+      window.removeEventListener(event, handler, eventOptions);
+    });
+  },
 
-export default function restrictScroll(exception) {
-  // If `exception` is blank, no element can be scrolled.
-  set(exception);
-  on();
+  // Add an element that scrolling is allowed within.
+  to: function (elem) {
+    allowScrollingWithin.add(elem);
+    this.run();
+  },
 
-  return {
-    on,
-    off,
-    set,
-  };
-}
+  // Remove an element that scrolling is allowed within.
+  delete: function (elem) {
+    allowScrollingWithin.delete(elem);
+    if (!allowScrollingWithin.size) this.stop();
+  },
+};
