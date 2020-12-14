@@ -2,7 +2,7 @@ import normalizeWheel from 'normalize-wheel';
 
 let allowScrollingInside;
 
-const events = ['scroll', 'wheel'];
+const events = ['wheel', 'mousedown', 'keydown', 'scroll'];
 const eventOptions = {
   capture: true,
   passive: false,
@@ -23,11 +23,10 @@ const EventListener = {
   },
 };
 
-const EL = Object.create(EventListener, {
+const handler = Object.create(EventListener, {
   elements: {
     writeable: true,
     value: new WeakMap(),
-    enumerable: false,
   },
   onkeydown: {
     value(e) {
@@ -75,19 +74,10 @@ const EL = Object.create(EventListener, {
   },
 });
 
-function scrollHandler(e) {
-  debugger;
-  if (!e.composedPath().includes(allowScrollingInside)) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-}
-
 function on() {
-  window.addEventListener('wheel', EL, eventOptions);
-  window.addEventListener('mousedown', EL, eventOptions);
-  window.addEventListener('keydown', EL, eventOptions);
-  window.addEventListener('scroll', EL, eventOptions);
+  events.forEach((event) => {
+    window.addEventListener(event, handler, eventOptions);
+  });
 }
 
 function off() {
