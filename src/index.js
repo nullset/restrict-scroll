@@ -1,16 +1,16 @@
 import normalizeWheel from 'normalize-wheel';
 
-let allowScrollingWithin = new Set();
+let list = new Set();
 
-function scrollableElement() {
-  const arr = Array.from(allowScrollingWithin);
+function target() {
+  const arr = Array.from(list);
   for (let i = arr.length - 1; i >= 0; i--) {
     const node = arr[i];
     if (node && node.isConnected) {
       return node;
     } else {
       arr.splice(i, 1);
-      allowScrollingWithin.delete(node);
+      list.delete(node);
     }
   }
 }
@@ -34,7 +34,7 @@ const handler = Object.create(EventListener, {
   },
   onkeydown: {
     value(e) {
-      if (!e.composedPath().includes(scrollableElement())) {
+      if (!e.composedPath().includes(target())) {
         e.preventDefault();
       }
     },
@@ -49,7 +49,7 @@ const handler = Object.create(EventListener, {
   },
   onscroll: {
     value(e) {
-      if (!e.composedPath().includes(scrollableElement())) {
+      if (!e.composedPath().includes(target())) {
         e.preventDefault();
         const target =
           e.target === document ? document.documentElement : e.target;
@@ -64,13 +64,13 @@ const handler = Object.create(EventListener, {
     value(e) {
       e.preventDefault();
       const nodePath = e.composedPath();
-      const idx = nodePath.indexOf(scrollableElement());
+      const idx = nodePath.indexOf(target());
       if (idx > -1) {
         const elems = nodePath.slice(0, idx + 1);
         if (elems.length) {
           let { pixelX, pixelY } = normalizeWheel(e);
           elems.forEach((elem) => {
-            // Scroll any scrollable element that is either `allowScrollingElement` or within `allowScrollingElemnt`.
+            // Scroll any scrollable element that is either in the `list` list or a child of an element within `list`.
             // Ensure that the remaining wheel delta is updated by the scrollable amount as each element is scrolled.
             const top = elem.scrollTop;
             const left = elem.scrollLeft;
@@ -89,9 +89,15 @@ const handler = Object.create(EventListener, {
 export default {
   // Specified element where scrolling is allowed.
   // NOTE: This enables scrolling within this element, including on other children within this element.
-  elements: new Set(),
+  get list() {
+    return list;
+  },
 
-  // Restrict scrolling to only elements within the `exception` element.
+  get scrollableElement() {
+    return target();
+  },
+
+  // Restrict scrolling to only the `target()` element.
   run: function () {
     events.forEach((event) => {
       window.addEventListener(event, handler, eventOptions);
@@ -105,15 +111,17 @@ export default {
     });
   },
 
-  // Add an element that scrolling is allowed within.
+  // Add an element within which scrolling is allowed.
+  // NOTE: Only one element can be scrollable at a time. Any existing element within `list`
+  // becomes unscrollable unless that element is a child of the `target()` element (most recently specified element).
   to: function (elem) {
-    allowScrollingWithin.add(elem);
+    list.add(elem);
     this.run();
   },
 
-  // Remove an element that scrolling is allowed within.
+  // Remove a scrollable element. Specified element will now be unscrollable unless this a child of another scrollable element.
   delete: function (elem) {
-    allowScrollingWithin.delete(elem);
-    if (!allowScrollingWithin.size) this.stop();
+    list.delete(elem);
+    if (!list.size) this.stop();
   },
 };
