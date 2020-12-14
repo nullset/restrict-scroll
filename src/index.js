@@ -2,7 +2,7 @@ import normalizeWheel from 'normalize-wheel';
 
 let list = new Set();
 
-function target() {
+function activeElement() {
   const arr = Array.from(list);
   for (let i = arr.length - 1; i >= 0; i--) {
     const node = arr[i];
@@ -93,8 +93,8 @@ export default {
     return list;
   },
 
-  get scrollableElement() {
-    return target();
+  get activeElement() {
+    return activeElement();
   },
 
   // Restrict scrolling to only the `target()` element.
