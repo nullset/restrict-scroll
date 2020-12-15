@@ -115,6 +115,8 @@ export default {
   // NOTE: Only one element can be scrollable at a time. Any existing element within `list`
   // becomes unscrollable unless that element is a child of the `target()` element (most recently specified element).
   to: function (elem) {
+    // If element already exists in the list, delete the list's reference to it, and add the elment to the end of the list.
+    if (list.has(elem)) list.delete(elem);
     list.add(elem);
     this.run();
   },
