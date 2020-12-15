@@ -23,22 +23,22 @@ and then in your javascript
 ```
 import restrictScroll from 'restrict-scroll';
 const scrollableElement = document.getElementById('my-scroller');
-restrictScroll.to(scrollableElement);
+restrictScroll.add(scrollableElement);
 ```
 
 ## API
 
 ### list
 
-Returns a list of elements which can be scrolled, in the order in which they were specified as scrollable. Note that there can be only a single "active" scrollable element at a time.
+Returns a list of elements which can be scrolled, in the order in which they were specified as scrollable. Note that there can be only a single "active" scrollable element at a time. If the "active" scrollable element is removed from the page (for example, a modal being closed) the next most recently added element in the list becomes "active" and scrolling is limited to _that_ element.
 
 ### activeElement
 
 Returns the "active" scrollable element.
 
-### to(`<element>`)
+### add(`<element>`)
 
-Updates the "active" element that can be scrolled. Scrolling is limited to occurring within that element and all of that element's child elements.
+Updates the "active" element that can be scrolled. Any element that is set via `add` is appended to the list of potentially scrollable elements. Scrolling is limited to occurring within that element and all of that element's child elements.
 
 ### delete(`<element>`)
 

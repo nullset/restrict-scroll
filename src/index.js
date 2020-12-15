@@ -34,7 +34,7 @@ const handler = Object.create(EventListener, {
   },
   onkeydown: {
     value(e) {
-      if (!e.composedPath().includes(target())) {
+      if (!e.composedPath().includes(activeElement())) {
         e.preventDefault();
       }
     },
@@ -49,7 +49,7 @@ const handler = Object.create(EventListener, {
   },
   onscroll: {
     value(e) {
-      if (!e.composedPath().includes(target())) {
+      if (!e.composedPath().includes(activeElement())) {
         e.preventDefault();
         const target =
           e.target === document ? document.documentElement : e.target;
@@ -64,7 +64,7 @@ const handler = Object.create(EventListener, {
     value(e) {
       e.preventDefault();
       const nodePath = e.composedPath();
-      const idx = nodePath.indexOf(target());
+      const idx = nodePath.indexOf(activeElement());
       if (idx > -1) {
         const elems = nodePath.slice(0, idx + 1);
         if (elems.length) {
@@ -97,7 +97,7 @@ export default {
     return activeElement();
   },
 
-  // Restrict scrolling to only the `target()` element.
+  // Restrict scrolling to only the `activeElement` element.
   run: function () {
     events.forEach((event) => {
       window.addEventListener(event, handler, eventOptions);
@@ -113,8 +113,8 @@ export default {
 
   // Add an element within which scrolling is allowed.
   // NOTE: Only one element can be scrollable at a time. Any existing element within `list`
-  // becomes unscrollable unless that element is a child of the `target()` element (most recently specified element).
-  to: function (elem) {
+  // becomes unscrollable unless that element is a child of the `activeElement` element (most recently specified element).
+  add: function (elem) {
     // If element already exists in the list, delete the list's reference to it, and add the elment to the end of the list.
     if (list.has(elem)) list.delete(elem);
     list.add(elem);
