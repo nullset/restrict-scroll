@@ -70,6 +70,9 @@ const handler = Object.create(EventListener, {
         if (elems.length) {
           let { pixelX, pixelY } = normalizeWheel(e);
           elems.forEach((elem) => {
+            // Only scroll on element nodes, not document/document-fragments. Ensures it works with shadowDOM.
+            if (elem.nodeType !== Node.ELEMENT_NODE) return;
+
             // Scroll any scrollable element that is either in the `list` list or a child of an element within `list`.
             // Ensure that the remaining wheel delta is updated by the scrollable amount as each element is scrolled.
             const top = elem.scrollTop;
