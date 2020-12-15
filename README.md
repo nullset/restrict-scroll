@@ -20,23 +20,24 @@ and then in your javascript
 
 ```
 import restrictScroll from 'restrict-scroll';
-
 const scrollableElement = document.getElementById('my-scroller');
-const scroller = restrictScroll(scrollableElement);
+restrictScroll.to(scrollableElement);
 ```
 
 ## API
 
-Restricting scrolling on a page is as simple as calling `restrictScroll()` or `restrictScroll(element)`.
+### to(<element>)
 
-### set(<element>)
+Updates the "active" element that can be scrolled. Scrolling is limited to occurring within that element and all of that element's child elements.
 
-Updates the element that can be scrolled. If no element is passed to the `set` or `restrictScroll` functions, by default ALL scrolling on the page in every element is disabled. If an element is passed to the function, then scrolling is limited to occurring within that element and all of that element's child elements.
+### delete(<element>)
 
-### off()
+Scrolling is no longer restricted to the specified element. If another element was specified previously, that earlier element will become the "active" element. If no previous elements exist, then scrolling is enabled on all elements.
+
+### stop()
 
 Enables scrolling on all elements on the page.
 
-### on()
+### run()
 
-Disables scrolling on every element on the page _except_ for the element specified within the `set` function or passed to the `restrictScrolling` function.
+Disables scrolling on every element on the page _except_ for the element specified within the `to` function.
