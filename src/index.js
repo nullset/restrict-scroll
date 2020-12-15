@@ -124,4 +124,9 @@ export default {
     list.delete(elem);
     if (!list.size) this.stop();
   },
+
+  // Clears all elements from the list of scrollable elements. Every element becomes scrollable again.
+  clear: function () {
+    list.clear();
+  },
 };
