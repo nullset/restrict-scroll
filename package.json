@@ -1,6 +1,6 @@
 {
   "name": "restrict-scroll",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A tiny library to prevent scrolling on every element unless otherwise allowed.",
   "main": "index.js",
   "keywords": [
