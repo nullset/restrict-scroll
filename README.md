@@ -54,4 +54,4 @@ Enables scrolling on all elements on the page.
 
 ### run()
 
-Disables scrolling on every element on the page _except_ for the element specified within the `to` function.
+Disables scrolling on every element on the page _except_ for the element specified within the `add` function.
