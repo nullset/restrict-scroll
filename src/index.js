@@ -34,6 +34,7 @@ const handler = Object.create(EventListener, {
   },
   onkeydown: {
     value(e) {
+      if (!restrictScroll.list.size) return;
       if (!e.composedPath().includes(activeElement())) {
         e.preventDefault();
       }
@@ -41,6 +42,7 @@ const handler = Object.create(EventListener, {
   },
   onmousedown: {
     value(e) {
+      if (!restrictScroll.list.size) return;
       this.elementScrollPositions.set(e.target, {
         top: e.target.scrollTop,
         left: e.target.scrollLeft,
@@ -49,6 +51,8 @@ const handler = Object.create(EventListener, {
   },
   onscroll: {
     value(e) {
+      if (!restrictScroll.list.size) return;
+      e.preventDefault();
       if (!e.composedPath().includes(activeElement())) {
         e.preventDefault();
         const target =
@@ -62,6 +66,7 @@ const handler = Object.create(EventListener, {
   },
   onwheel: {
     value(e) {
+      if (!restrictScroll.list.size) return;
       e.preventDefault();
       const nodePath = e.composedPath();
       const idx = nodePath.indexOf(activeElement());
@@ -89,11 +94,15 @@ const handler = Object.create(EventListener, {
   },
 });
 
-export default {
+const restrictScroll = {
   // Specified element where scrolling is allowed.
   // NOTE: This enables scrolling within this element, including on other children within this element.
   get list() {
     return list;
+  },
+
+  get isWatching() {
+    return !!list.size;
   },
 
   get activeElement() {
@@ -108,7 +117,8 @@ export default {
   },
 
   // Allow scrolling on all elements once again.
-  stop: function () {
+  // Typically used to temporarily allow scrolling on all elements.
+  pause: function () {
     events.forEach((event) => {
       window.removeEventListener(event, handler, eventOptions);
     });
@@ -135,3 +145,5 @@ export default {
     list.clear();
   },
 };
+
+export default restrictScroll;
