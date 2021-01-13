@@ -137,7 +137,7 @@ const restrictScroll = {
   // Remove a scrollable element. Specified element will now be unscrollable unless this a child of another scrollable element.
   delete: function (elem) {
     list.delete(elem);
-    if (!list.size) this.stop();
+    if (!list.size) this.pause();
   },
 
   // Clears all elements from the list of scrollable elements. Every element becomes scrollable again.
