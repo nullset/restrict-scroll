@@ -26,15 +26,18 @@ const scrollableElement = document.getElementById('my-scroller');
 
 // Either ...
 
-restrictScroll.add(scrollableElement); // Allow scrolling on any child elements
+// Allow scrolling on parent element, and allow scrolling on any child elements
+restrictScroll.add(scrollableElement);
 
 // ... or ...
 
-restrictScroll.add(scrollableElement, { scrollChildren: true }); // Allow scrolling on any child elements
+// Allow scrolling on parent element, and allow scrolling on any child elements
+restrictScroll.add(scrollableElement, { scrollChildren: true });
 
 // ... or ...
 
-restrictScroll.add(scrollableElement, { scrollChildren: false }); // Prevent scrolling on any child elements
+// Allow scrolling on parent element, but prevent scrolling on any child elements
+restrictScroll.add(scrollableElement, { scrollChildren: false });
 ```
 
 ## API
@@ -47,7 +50,7 @@ Returns a list of elements which can be scrolled, in the order in which they wer
 
 Returns the "active" scrollable element.
 
-### add(`<element>`, { scrollChildren: true })
+### add(`<element>`, `{ scrollChildren: true }`)
 
 Updates the "active" element that can be scrolled. Any element that is set via `add` is appended to the list of potentially scrollable elements. Scrolling is limited to occurring within that most recently added element and all of that element's child elements. If it is known that children are not scrollable (because they have no `overflow` CSS property set) a performance boost can be had by setting the `scrollChildren` option to `false` (by default `scrollChildren` is set to `true`).
 
