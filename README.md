@@ -52,7 +52,9 @@ Returns the "active" scrollable element.
 
 ### add(`<element>`, `{ scrollChildren: true }`)
 
-Updates the "active" element that can be scrolled. Any element that is set via `add` is appended to the list of potentially scrollable elements. Scrolling is limited to occurring within that most recently added element and all of that element's child elements. If it is known that children are not scrollable (because they have no `overflow` CSS property set) a performance boost can be had by setting the `scrollChildren` option to `false` (by default `scrollChildren` is set to `true`).
+Updates the "active" element that can be scrolled. Any element that is set via `add` is appended to the list of potentially scrollable elements. Scrolling is limited to occurring within that most recently added element and all of that element's child elements.
+
+If it is known that children are not scrollable (because they have no `overflow` CSS property set) a performance boost can be had by setting the `scrollChildren` option to `false` (by default `scrollChildren` is set to `true`).
 
 ### delete(`<element>`)
 
