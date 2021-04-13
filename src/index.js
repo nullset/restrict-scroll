@@ -1,6 +1,7 @@
 import normalizeWheel from 'normalize-wheel';
 
 let list = new Set();
+const scrollChildrenMap = new WeakMap();
 
 function activeElement() {
   const arr = Array.from(list);
@@ -68,26 +69,33 @@ const handler = Object.create(EventListener, {
     value(e) {
       if (!restrictScroll.list.size) return;
       e.preventDefault();
+      let { pixelX, pixelY } = normalizeWheel(e);
       const nodePath = e.composedPath();
-      const idx = nodePath.indexOf(activeElement());
-      if (idx > -1) {
-        const elems = nodePath.slice(0, idx + 1);
-        if (elems.length) {
-          let { pixelX, pixelY } = normalizeWheel(e);
-          elems.forEach((elem) => {
-            // Only scroll on element nodes, not document/document-fragments. Ensures it works with shadowDOM.
-            if (elem.nodeType !== Node.ELEMENT_NODE) return;
+      const activeElem = activeElement();
+      const scrollChildren = scrollChildrenMap.get(activeElem);
 
-            // Scroll any scrollable element that is either in the `list` list or a child of an element within `list`.
-            // Ensure that the remaining wheel delta is updated by the scrollable amount as each element is scrolled.
-            const top = elem.scrollTop;
-            const left = elem.scrollLeft;
-            elem.scrollBy(pixelX, pixelY);
-            const diffTop = elem.scrollTop - top;
-            const diffLeft = elem.scrollLeft - left;
-            pixelY = pixelY - diffTop;
-            pixelX = pixelX - diffLeft;
-          });
+      if (!scrollChildren) {
+        activeElem.scrollBy(pixelX, pixelY);
+      } else {
+        const idx = nodePath.indexOf(activeElem);
+        if (idx > -1) {
+          const elems = nodePath.slice(0, idx + 1);
+          if (elems.length) {
+            elems.forEach((elem) => {
+              // Only scroll on element nodes, not document/document-fragments. Ensures it works with shadowDOM.
+              if (elem.nodeType !== Node.ELEMENT_NODE) return;
+
+              // Scroll any scrollable element that is either in the `list` list or a child of an element within `list`.
+              // Ensure that the remaining wheel delta is updated by the scrollable amount as each element is scrolled.
+              const top = elem.scrollTop;
+              const left = elem.scrollLeft;
+              elem.scrollBy(pixelX, pixelY);
+              const diffTop = elem.scrollTop - top;
+              const diffLeft = elem.scrollLeft - left;
+              pixelY = pixelY - diffTop;
+              pixelX = pixelX - diffLeft;
+            });
+          }
         }
       }
     },
@@ -127,10 +135,15 @@ const restrictScroll = {
   // Add an element within which scrolling is allowed.
   // NOTE: Only one element can be scrollable at a time. Any existing element within `list`
   // becomes unscrollable unless that element is a child of the `activeElement` element (most recently specified element).
-  add: function (elem) {
+  add: function (elem, options = {}) {
+    // If `scrollChildren` is undefined, then assume we want to scroll on any scrollable children inside this element.
+    options.scrollChildren =
+      options.scrollChildren == null ? true : options.scrollChildren;
+
     // If element already exists in the list, delete the list's reference to it, and add the elment to the end of the list.
     if (list.has(elem)) list.delete(elem);
     list.add(elem);
+    scrollChildrenMap.set(elem, options.scrollChildren);
     this.run();
   },
 

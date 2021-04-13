@@ -2,7 +2,7 @@
 
 A small library to restrict scrolling to a single element and its children.
 
-Note that while more than one element can be specified as potentially scrollable, only a single active scrollable element can be one the page at a time.
+Note that while more than one element can be specified as potentially scrollable, only a single active scrollable element will be recognized a time.
 
 ## Why use this library instead of libary X, Y, or Z?
 
@@ -23,7 +23,18 @@ and then in your javascript
 ```
 import restrictScroll from 'restrict-scroll';
 const scrollableElement = document.getElementById('my-scroller');
-restrictScroll.add(scrollableElement);
+
+// Either ...
+
+restrictScroll.add(scrollableElement); // Allow scrolling on any child elements
+
+// ... or ...
+
+restrictScroll.add(scrollableElement, { scrollChildren: true }); // Allow scrolling on any child elements
+
+// ... or ...
+
+restrictScroll.add(scrollableElement, { scrollChildren: false }); // Prevent scrolling on any child elements
 ```
 
 ## API
@@ -36,9 +47,9 @@ Returns a list of elements which can be scrolled, in the order in which they wer
 
 Returns the "active" scrollable element.
 
-### add(`<element>`)
+### add(`<element>`, { scrollChildren: true })
 
-Updates the "active" element that can be scrolled. Any element that is set via `add` is appended to the list of potentially scrollable elements. Scrolling is limited to occurring within that element and all of that element's child elements.
+Updates the "active" element that can be scrolled. Any element that is set via `add` is appended to the list of potentially scrollable elements. Scrolling is limited to occurring within that most recently added element and all of that element's child elements. If it is known that children are not scrollable (because they have no `overflow` CSS property set) a performance boost can be had by setting the `scrollChildren` option to `false` (by default `scrollChildren` is set to `true`).
 
 ### delete(`<element>`)
 
