@@ -1,6 +1,17 @@
 import normalizeWheel from 'normalize-wheel';
 import onPaint from 'on-paint';
-window.onPaint = onPaint;
+
+// Safari has a weird behavior where clicking on a button, etc. does not focus that element
+// (rather leaving the focused element whatever element was previously focused).
+// https://zellwk.com/blog/inconsistent-button-behavior/
+// Fix this behavior to make it more consistent between browsers. Now if an element has a tabIndex
+// then clicking on that element also focuses that element. This makes it possible for us to scroll
+// a parent <div> via arrow keys when a child of that <div> is clicked on and restrict-scroll is in effect.
+window.addEventListener('click', function (event) {
+  if (event.target.tabIndex > -1) {
+    event.target.focus();
+  }
+});
 
 let list = new Set();
 const scrollChildrenMap = new WeakMap();
@@ -18,27 +29,11 @@ function activeElement() {
   }
 }
 
+// Map to maintain original scroll position values.
 const scrollValues = new WeakMap();
-const scrollElements = new Set();
-window.scrollElements = scrollElements;
 
-let paintFns = new Set();
-window.paintFns = paintFns;
-
-function repositionNodes(nodes) {
-  nodes.forEach((node) => {
-    if (!node.isConnected) return;
-
-    // Reset the scroll offset to the stored value, and delete it so we can save a new offset.
-    const values = scrollValues.get(node);
-    if (values) {
-      const { top, left } = values;
-      // scrollValues.delete(node);
-      node.scrollTop = top;
-      node.scrollLeft = left;
-    }
-  });
-}
+// Set to keep track of all currently running resetScrollPosition functions.
+const resetScrollPositionFns = new Set();
 
 function freezeScrollPositions(nodes) {
   // Capture original scroll values.
@@ -51,7 +46,7 @@ function freezeScrollPositions(nodes) {
   });
 
   // Wait a tick, and then return all parts of the composedPath back to their original scroll positions;
-  paintFns.add(
+  resetScrollPositionFns.add(
     onPaint.set(() => {
       nodes.forEach((node) => {
         if (!node.isConnected) return;
@@ -86,14 +81,14 @@ const handler = Object.create(EventListener, {
   onkeyup: {
     enumerable: true,
     value(e) {
-      // Get the paintFns at this moment in time.
-      const currentPaintFns = Array.from(paintFns);
-      paintFns.clear();
+      // Get the resetScrollPositionFns at this moment in time.
+      const currentresetScrollPositionFns = Array.from(resetScrollPositionFns);
+      resetScrollPositionFns.clear();
 
       // It appears to be possible for chromium browsers to process keydown events for a
       // brief period of time, even after the keyup event has been run. Add a small delay to account for this.
       setTimeout(() => {
-        currentPaintFns.forEach((onPaintId) => {
+        currentresetScrollPositionFns.forEach((onPaintId) => {
           onPaint.delete(onPaintId);
         });
       }, 40);
@@ -103,6 +98,7 @@ const handler = Object.create(EventListener, {
     enumerable: true,
     value(e) {
       if (!restrictScroll.list.size) return;
+
       if (!e.composedPath().includes(activeElement())) {
         e.preventDefault();
       }
