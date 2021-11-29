@@ -1,6 +1,6 @@
 # restrict-scroll
 
-A small library to restrict scrolling to a single element and its children.
+A small library to restrict scrolling to a single element and its children. Only two dependencies.
 
 Note that while more than one element can be specified as potentially scrollable, only a single active scrollable element will be recognized a time.
 
@@ -8,7 +8,7 @@ Note that while more than one element can be specified as potentially scrollable
 
 ### 1.3.0
 
-Now correctly handles up/down arrow, page up/down, home/end events.
+Now correctly handles up/down arrow, page up/down, home/end events when focused inside the scrollable area.
 
 ## Why use this library instead of libary X, Y, or Z?
 
@@ -76,4 +76,4 @@ Enables scrolling on all elements on the page.
 
 ### run()
 
-Disables scrolling on every element on the page _except_ for the element specified within the `add` function.
+Disables scrolling on every element on the page _except_ for the element specified within the `add` function. By default any time you `add` an element the `run` function is called.
