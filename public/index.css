@@ -17,6 +17,10 @@ h3 {
 .modal {
   border: 3px solid red;
 }
+button.modal[data-active] {
+  background: red;
+  color: white;
+}
 #modal {
   position: fixed;
   top: 25%;
@@ -31,6 +35,10 @@ h3 {
 
 .section {
   border: 3px solid royalblue;
+}
+button.section[data-active] {
+  background: royalblue;
+  color: white;
 }
 #section {
   padding: 10px;
