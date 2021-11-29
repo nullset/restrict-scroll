@@ -22,7 +22,6 @@ const scrollValues = new WeakMap();
 const scrollElements = new Set();
 window.scrollElements = scrollElements;
 
-let paintId;
 let paintFns = new Set();
 window.paintFns = paintFns;
 
@@ -98,18 +97,6 @@ const handler = Object.create(EventListener, {
     writeable: true,
     value: new WeakMap(),
   },
-  onkeydown: {
-    enumerable: true,
-    value(e) {
-      if (!restrictScroll.list.size) return;
-      if (!e.composedPath().includes(activeElement())) {
-        e.preventDefault();
-      }
-
-      freezeScrollPositions(e.composedPath());
-      console.log('DOWN', onPaint);
-    },
-  },
   onkeyup: {
     enumerable: true,
     value(e) {
@@ -125,16 +112,31 @@ const handler = Object.create(EventListener, {
       // console.log(onPaint);
 
       // Get the paintFns at this moment in time.
-      const foo = Array.from(paintFns);
+      const currentPaintFns = Array.from(paintFns);
       paintFns.clear();
+
+      // It appears to be possible for chromium browsers to register process keydown events for a
+      // brief period of time, even after the keyup event has been run. Add a small delay to account for this.
       setTimeout(() => {
-        foo.forEach((onPaintId) => {
+        currentPaintFns.forEach((onPaintId) => {
           onPaint.delete(onPaintId);
-          // onPaintDeleteFn();
         });
       }, 40);
     },
   },
+  onkeydown: {
+    enumerable: true,
+    value(e) {
+      if (!restrictScroll.list.size) return;
+      if (!e.composedPath().includes(activeElement())) {
+        e.preventDefault();
+      }
+
+      freezeScrollPositions(e.composedPath());
+      console.log('DOWN', onPaint);
+    },
+  },
+
   onmousedown: {
     enumerable: true,
     value(e) {
