@@ -29,6 +29,15 @@ function activeElement() {
   }
 }
 
+const movementKeys = [
+  'ArrowDown',
+  'ArrowUp',
+  'PageDown',
+  'PageUp',
+  'Home',
+  'End',
+];
+
 // Map to maintain original scroll position values.
 const scrollValues = new WeakMap();
 
@@ -81,6 +90,11 @@ const handler = Object.create(EventListener, {
   onkeyup: {
     enumerable: true,
     value(e) {
+      if (!restrictScroll.list.size) return;
+
+      // We only care about keys that could potentially affect scroll position.
+      if (!movementKeys.includes(e.key)) return;
+
       // Get the resetScrollPositionFns at this moment in time.
       const currentresetScrollPositionFns = Array.from(resetScrollPositionFns);
       resetScrollPositionFns.clear();
@@ -98,6 +112,9 @@ const handler = Object.create(EventListener, {
     enumerable: true,
     value(e) {
       if (!restrictScroll.list.size) return;
+
+      // We only care about keys that could potentially affect scroll position.
+      if (!movementKeys.includes(e.key)) return;
 
       if (!e.composedPath().includes(activeElement())) {
         e.preventDefault();
@@ -144,7 +161,7 @@ const handler = Object.create(EventListener, {
       const scrollChildren = scrollChildrenMap.get(activeElem);
 
       if (!scrollChildren) {
-        activeElem.scrollBy(pixelX, pixelY);
+        activeElem?.scrollBy(pixelX, pixelY);
       } else {
         const idx = nodePath.indexOf(activeElem);
         if (idx > -1) {
