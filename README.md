@@ -8,7 +8,7 @@ Note that while more than one element can be specified as potentially scrollable
 
 ### 1.3.0
 
-Now correctly handles up/down arrow, page scroll, home/end events.
+Now correctly handles up/down arrow, page up/down, home/end events.
 
 ## Why use this library instead of libary X, Y, or Z?
 
