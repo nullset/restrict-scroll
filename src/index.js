@@ -47,38 +47,24 @@ function freezeScrollPositions(nodes) {
     if (node.nodeType !== Node.ELEMENT_NODE) return;
     if (restrictScroll.activeElement.contains(node)) return;
 
-    // If we have not already stored the starting scroll offset, do so. Important to prevent a bug
-    // where some scroll events would sneak through over a long enough time frame.
-    // if (!scrollValues.has(node)) {
     scrollValues.set(node, { top: node.scrollTop, left: node.scrollLeft });
-    // }
   });
 
   // Wait a tick, and then return all parts of the composedPath back to their original scroll positions;
-  // if (!paintId) {
-  const onPaintId = onPaint.set(() => {
-    nodes.forEach((node) => {
-      if (!node.isConnected) return;
+  paintFns.add(
+    onPaint.set(() => {
+      nodes.forEach((node) => {
+        if (!node.isConnected) return;
 
-      // Reset the scroll offset to the stored value, and delete it so we can save a new offset.
-      const values = scrollValues.get(node);
-      if (values) {
-        const { top, left } = values;
-        // scrollValues.delete(node);
-        node.scrollTop = top;
-        node.scrollLeft = left;
-      }
-    });
-  });
-  // window.addEventListener('keyup', onPaintDeleteFn, {
-  //   capture: true,
-  //   once: true,
-  // });
-  // onPaintDeleteFn();
-
-  paintFns.add(onPaintId);
-  console.log('paintId', onPaint);
-  // }
+        // Reset the scroll offset to the stored value.
+        const values = scrollValues.get(node);
+        if (values) {
+          node.scrollTop = values.top;
+          node.scrollLeft = values.left;
+        }
+      });
+    }),
+  );
 }
 
 const eventOptions = {
@@ -100,22 +86,11 @@ const handler = Object.create(EventListener, {
   onkeyup: {
     enumerable: true,
     value(e) {
-      // setTimeout(() => {
-      // onPaint.delete(paintId);
-      // paintId = undefined;
-      // console.log('UP', onPaint);
-      // }, 1000);
-
-      // const paintEvent = paintFns.shift();
-      // debugger;
-      // if (paintEvent) paintEvent();
-      // console.log(onPaint);
-
       // Get the paintFns at this moment in time.
       const currentPaintFns = Array.from(paintFns);
       paintFns.clear();
 
-      // It appears to be possible for chromium browsers to register process keydown events for a
+      // It appears to be possible for chromium browsers to process keydown events for a
       // brief period of time, even after the keyup event has been run. Add a small delay to account for this.
       setTimeout(() => {
         currentPaintFns.forEach((onPaintId) => {
@@ -133,7 +108,6 @@ const handler = Object.create(EventListener, {
       }
 
       freezeScrollPositions(e.composedPath());
-      console.log('DOWN', onPaint);
     },
   },
 
