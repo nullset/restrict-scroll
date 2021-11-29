@@ -76,4 +76,4 @@ Enables scrolling on all elements on the page.
 
 ### run()
 
-Disables scrolling on every element on the page _except_ for the element specified within the `add` function. By default any time you `add` an element the `run` function is called.
+Disables scrolling on every element on the page _except_ for the element specified within the `add` function. By default any time you `add` an element the `run` function is called, so you likely don't need to call `run` unless you've ever called `stop`.
