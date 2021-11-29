@@ -4,6 +4,12 @@ A small library to restrict scrolling to a single element and its children.
 
 Note that while more than one element can be specified as potentially scrollable, only a single active scrollable element will be recognized a time.
 
+## Changelog
+
+### 1.3.0
+
+Now correctly handles up/down arrow, page scroll, home/end events.
+
 ## Why use this library instead of libary X, Y, or Z?
 
 Most solutions to this problem rely on tweaking the CSS of various elements on the fly to effectively make them unscrollable by making their `overflow` CSS property be `none`. While this is an easy and effective solution it can cause jarring page reflows as scrollbars can appear/disappear on the page.
