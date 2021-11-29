@@ -46,6 +46,10 @@ restrictScroll.add(scrollableElement, { scrollChildren: true });
 restrictScroll.add(scrollableElement, { scrollChildren: false });
 ```
 
+## Run locally
+
+To see a demo page, simply `npm run start`.
+
 ## API
 
 ### list
