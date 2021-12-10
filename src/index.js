@@ -32,6 +32,8 @@ function activeElement() {
 const movementKeys = [
   'ArrowDown',
   'ArrowUp',
+  'ArrowLeft',
+  'ArrowRight',
   'PageDown',
   'PageUp',
   'Home',
