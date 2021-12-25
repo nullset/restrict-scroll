@@ -6,6 +6,10 @@ Note that while more than one element can be specified as potentially scrollable
 
 ## Changelog
 
+### 1.3.6
+
+Correctly handle when the space bar is used for scrolling.
+
 ### 1.3.0
 
 Now correctly handles up/down arrow, page up/down, home/end events when focused inside the scrollable area.

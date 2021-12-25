@@ -1,6 +1,13 @@
 import normalizeWheel from 'normalize-wheel';
 import onPaint from 'on-paint';
 
+function closestAll(element, filter = '*', lineage = []) {
+  if (element.matches(filter)) lineage.push(element);
+
+  const parent = element.parentElement || element.getRootNode().host;
+  return parent ? closestAll(parent, filter, lineage) : lineage;
+}
+
 // Safari has a weird behavior where clicking on a button, etc. does not focus that element
 // (rather leaving the focused element whatever element was previously focused).
 // https://zellwk.com/blog/inconsistent-button-behavior/
@@ -30,6 +37,7 @@ function activeElement() {
 }
 
 const movementKeys = [
+  ' ',
   'ArrowDown',
   'ArrowUp',
   'ArrowLeft',
@@ -118,11 +126,17 @@ const handler = Object.create(EventListener, {
       // We only care about keys that could potentially affect scroll position.
       if (!movementKeys.includes(e.key)) return;
 
-      if (!e.composedPath().includes(activeElement())) {
-        e.preventDefault();
+      // Scrolling via space bar is weird, because after it is done scrolling the element that you're focused inside, it scrolls that element's parent elements.
+      if (e.key === ' ') {
+        const ancestors = closestAll(activeElement());
+        ancestors.shift();
+        freezeScrollPositions(ancestors);
+      } else {
+        if (!e.composedPath().includes(activeElement())) {
+          e.preventDefault();
+        }
+        freezeScrollPositions(e.composedPath());
       }
-
-      freezeScrollPositions(e.composedPath());
     },
   },
 
