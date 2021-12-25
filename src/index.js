@@ -177,7 +177,7 @@ const handler = Object.create(EventListener, {
       const scrollChildren = scrollChildrenMap.get(activeElem);
 
       if (!scrollChildren) {
-        activeElem?.scrollBy(pixelX, pixelY);
+        if (activeElem) activeElem.scrollBy(pixelX, pixelY);
       } else {
         const idx = nodePath.indexOf(activeElem);
         if (idx > -1) {
