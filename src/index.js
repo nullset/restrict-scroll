@@ -14,11 +14,12 @@ function closestAll(element, filter = '*', lineage = []) {
 // Fix this behavior to make it more consistent between browsers. Now if an element has a tabIndex
 // then clicking on that element also focuses that element. This makes it possible for us to scroll
 // a parent <div> via arrow keys when a child of that <div> is clicked on and restrict-scroll is in effect.
-window.addEventListener('click', function (event) {
-  if (event.target.tabIndex > -1) {
-    event.target.focus();
-  }
-});
+// TODO: re-enable when you work around this issue in the app. Essentially the datepicker library is broken.
+// window.addEventListener('click', function (event) {
+//   if (event.target.tabIndex > -1) {
+//     event.target.focus();
+//   }
+// });
 
 let list = new Set();
 const scrollChildrenMap = new WeakMap();
