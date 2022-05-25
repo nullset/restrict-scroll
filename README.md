@@ -4,7 +4,7 @@ A small library to restrict scrolling to a single element and its children. Only
 
 Note that while more than one element can be specified as potentially scrollable, only a single active scrollable element will be recognized a time.
 
-## Changelog
+## Notable updates
 
 ### 1.3.6
 

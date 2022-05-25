@@ -60,7 +60,7 @@ function freezeScrollPositions(nodes) {
   nodes.forEach((node) => {
     if (!node.isConnected) return;
     if (node.nodeType !== Node.ELEMENT_NODE) return;
-    if (restrictScroll.activeElement.contains(node)) return;
+    if (restrictScroll.activeElement && restrictScroll.activeElement.contains(node)) return;
 
     scrollValues.set(node, { top: node.scrollTop, left: node.scrollLeft });
   });
