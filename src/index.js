@@ -38,6 +38,10 @@ if (!window.restrictScroll) {
     }
   }
 
+  function isEditableElement(elem) {
+    return elem.matches('input, textarea, [contenteditable]') && !elem.disabled;
+  }
+
   const movementKeys = [
     ' ',
     'ArrowDown',
@@ -109,7 +113,8 @@ if (!window.restrictScroll) {
         if (!restrictScroll.list.size) return;
 
         // We only care about keys that could potentially affect scroll position.
-        if (!movementKeys.includes(e.key)) return;
+        if (!isEditableElement(e.target) && !movementKeys.includes(e.key))
+          return;
 
         // Get the resetScrollPositionFns at this moment in time.
         const currentresetScrollPositionFns = Array.from(
@@ -132,7 +137,8 @@ if (!window.restrictScroll) {
         if (!restrictScroll.list.size) return;
 
         // We only care about keys that could potentially affect scroll position.
-        if (!movementKeys.includes(e.key)) return;
+        if (!isEditableElement(e.target) && !movementKeys.includes(e.key))
+          return;
 
         // Scrolling via space bar is weird, because after it is done scrolling the element that you're focused inside, it scrolls that element's parent elements.
         if (e.key === ' ') {
