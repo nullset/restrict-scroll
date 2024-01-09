@@ -38,6 +38,7 @@ if (!window.restrictScroll) {
     }
   }
 
+  // Check if an element is an "editable" element (something that can be typed into). If it is, then we don't want to preventDefault on the keydown/keyup event.
   function isEditableElement(elem) {
     return elem.matches('input, textarea, [contenteditable]') && !elem.disabled;
   }
@@ -112,9 +113,10 @@ if (!window.restrictScroll) {
       value(e) {
         if (!restrictScroll.list.size) return;
 
+        if (isEditableElement(e.target)) return;
+
         // We only care about keys that could potentially affect scroll position.
-        if (!isEditableElement(e.target) && !movementKeys.includes(e.key))
-          return;
+        if (!movementKeys.includes(e.key)) return;
 
         // Get the resetScrollPositionFns at this moment in time.
         const currentresetScrollPositionFns = Array.from(
@@ -136,9 +138,10 @@ if (!window.restrictScroll) {
       value(e) {
         if (!restrictScroll.list.size) return;
 
+        if (isEditableElement(e.target)) return;
+
         // We only care about keys that could potentially affect scroll position.
-        if (!isEditableElement(e.target) && !movementKeys.includes(e.key))
-          return;
+        if (!movementKeys.includes(e.key)) return;
 
         // Scrolling via space bar is weird, because after it is done scrolling the element that you're focused inside, it scrolls that element's parent elements.
         if (e.key === ' ') {
