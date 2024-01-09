@@ -6,6 +6,10 @@ Note that while more than one element can be specified as potentially scrollable
 
 ## Notable updates
 
+### 1.3.13
+
+Arrow/page/etc. key up and down events used to be prevented wholesale, as they can affect what is scrolled on the screen. We now try to be smarter about this, and allow these events but only if the element that the event is happening on is an "editable" element (ex. an `<input>`, `<textarea>`, or `contenteditable` element). This allows for normal key navigation within these elements without affecting scroll position.
+
 ### 1.3.10
 
 Expose restrictScroll on the window object. While global objects suck, it's the only way to ensure that package managers are always using the same instance of restrictScroll, and which allows users to import restrictScroll multiple times in various modules without creating a new instance.
