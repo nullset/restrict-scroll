@@ -6,7 +6,10 @@ if (!window.restrictScroll) {
     if (!element) return lineage;
     if (element.matches(filter)) lineage.push(element);
 
-    const parent = element.parentElement || element.getRootNode().host;
+    const parent =
+      element.assignedSlot ||
+      element.parentElement ||
+      element.getRootNode().host;
     return parent ? closestAll(parent, filter, lineage) : lineage;
   }
 
