@@ -8,7 +8,7 @@ Note that while more than one element can be specified as potentially scrollable
 
 ### 1.3.14
 
-Fix error that can occur if restrit-scroll tries to handle a keyboard event for an element that has already been removed from the DOM. Thanks (@erezny)[https://github.com/erezny]!
+Fix error that can occur if restrit-scroll tries to handle a keyboard event for an element that has already been removed from the DOM. Thanks [@erezny](https://github.com/erezny)!
 
 ### 1.3.13
 
