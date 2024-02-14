@@ -3,6 +3,7 @@ import onPaint from 'on-paint';
 
 if (!window.restrictScroll) {
   function closestAll(element, filter = '*', lineage = []) {
+    if (!element) return lineage;
     if (element.matches(filter)) lineage.push(element);
 
     const parent = element.parentElement || element.getRootNode().host;
